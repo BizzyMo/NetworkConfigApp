@@ -149,7 +149,10 @@ namespace NetworkConfigApp.Forms
 
             try
             {
-                AppendResult($"\nPinging {host}...\n");
+                AppendResult("\n" + new string('─', 50));
+                AppendResult("PING TEST");
+                AppendResult(new string('─', 50));
+                AppendResult($"Pinging {host}...\n");
 
                 for (int i = 0; i < 4 && !_cts.Token.IsCancellationRequested; i++)
                 {
@@ -182,7 +185,10 @@ namespace NetworkConfigApp.Forms
 
             try
             {
-                AppendResult($"\nTracing route to {host}...\n");
+                AppendResult("\n" + new string('─', 50));
+                AppendResult("TRACEROUTE TEST");
+                AppendResult(new string('─', 50));
+                AppendResult($"Tracing route to {host}...\n");
 
                 var result = await _networkService.TraceRouteAsync(host, 30, 3000, _cts.Token);
 
@@ -217,7 +223,10 @@ namespace NetworkConfigApp.Forms
 
             try
             {
-                AppendResult($"\nResolving {host}...\n");
+                AppendResult("\n" + new string('─', 50));
+                AppendResult("DNS LOOKUP TEST");
+                AppendResult(new string('─', 50));
+                AppendResult($"Resolving {host}...\n");
 
                 var result = await _networkService.TestDnsAsync(host, _cts.Token);
                 AppendResult(result.Message);
@@ -240,7 +249,9 @@ namespace NetworkConfigApp.Forms
 
             try
             {
-                AppendResult("\n=== Full Connectivity Test ===\n");
+                AppendResult("\n" + new string('─', 50));
+                AppendResult("FULL CONNECTIVITY TEST");
+                AppendResult(new string('─', 50) + "\n");
 
                 var gateway = _adapter?.CurrentConfiguration.Gateway ?? string.Empty;
                 var dns = _adapter?.CurrentConfiguration.Dns1 ?? "8.8.8.8";

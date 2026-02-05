@@ -119,7 +119,7 @@ namespace NetworkConfigApp.Forms
             SuspendLayout();
 
             // Form settings
-            Text = "Network Configuration";
+            Text = "Network Adapter IP Configuration";
             Size = new Size(700, 750);
             MinimumSize = new Size(650, 700);
             StartPosition = FormStartPosition.CenterScreen;
