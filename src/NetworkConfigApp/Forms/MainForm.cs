@@ -220,6 +220,10 @@ namespace NetworkConfigApp.Forms
 
             // Help menu
             var helpMenu = new ToolStripMenuItem("&Help");
+            var menuUserGuide = new ToolStripMenuItem("&User Guide...", null, (s, e) => ShowHelp());
+            menuUserGuide.ShortcutKeys = Keys.F1;
+            helpMenu.DropDownItems.Add(menuUserGuide);
+            helpMenu.DropDownItems.Add(new ToolStripSeparator());
             helpMenu.DropDownItems.Add("&About...", null, (s, e) => ShowAbout());
 
             menuStrip.Items.AddRange(new ToolStripItem[] { fileMenu, presetsMenu, toolsMenu, helpMenu });
@@ -327,13 +331,44 @@ namespace NetworkConfigApp.Forms
             var btnCopy = new Button { Text = "Copy Current", Location = new Point(235, 20), Size = new Size(80, 25) };
             btnCopy.Click += (s, e) => CopyCurrentToNew();
 
+            // DNS quick-select buttons
+            var btnGoogleDns = new Button
+            {
+                Text = "Google",
+                Location = new Point(235, 104),
+                Size = new Size(60, 23),
+                Tag = "dns-preset",
+                FlatStyle = FlatStyle.Flat
+            };
+            btnGoogleDns.Click += (s, e) =>
+            {
+                txtNewDns1.Text = "8.8.8.8";
+                txtNewDns2.Text = "8.8.4.4";
+            };
+
+            var btnQuad9Dns = new Button
+            {
+                Text = "Quad9",
+                Location = new Point(235, 132),
+                Size = new Size(60, 23),
+                Tag = "dns-preset",
+                FlatStyle = FlatStyle.Flat
+            };
+            btnQuad9Dns.Click += (s, e) =>
+            {
+                txtNewDns1.Text = "9.9.9.9";
+                txtNewDns2.Text = "149.112.112.112";
+            };
+
             group.Controls.AddRange(new Control[] {
                 lblIp, txtNewIp,
                 lblSubnet, txtNewSubnet,
                 lblGw, txtNewGateway,
                 lblDns1, txtNewDns1,
                 lblDns2, txtNewDns2,
-                btnCopy
+                btnCopy,
+                btnGoogleDns,
+                btnQuad9Dns
             });
 
             return group;
@@ -508,12 +543,133 @@ namespace NetworkConfigApp.Forms
 
         private void ApplyTheme()
         {
-            // Apply theme based on settings
-            if (_settings.Theme == AppTheme.Dark)
+            var isDark = _settings.Theme == AppTheme.Dark;
+
+            // Define color schemes
+            Color backColor, foreColor, groupBack, textBoxBack, buttonBack, buttonFore;
+
+            if (isDark)
             {
-                BackColor = Color.FromArgb(45, 45, 48);
-                ForeColor = Color.White;
-                // Apply to all controls recursively...
+                backColor = Color.FromArgb(45, 45, 48);
+                foreColor = Color.White;
+                groupBack = Color.FromArgb(55, 55, 58);
+                textBoxBack = Color.FromArgb(60, 60, 65);
+                buttonBack = Color.FromArgb(0, 122, 204);
+                buttonFore = Color.White;
+            }
+            else // Light - Modern blue/white design
+            {
+                backColor = Color.FromArgb(240, 245, 250);      // Light blue-gray background
+                foreColor = Color.FromArgb(30, 40, 60);         // Dark slate text
+                groupBack = Color.White;                         // White panels
+                textBoxBack = Color.White;                       // White inputs
+                buttonBack = Color.FromArgb(59, 130, 246);      // Blue buttons
+                buttonFore = Color.White;                        // White button text
+            }
+
+            ApplyThemeToControl(this, backColor, foreColor, groupBack, textBoxBack, buttonBack, buttonFore, isDark);
+        }
+
+        private void ApplyThemeToControl(Control parent, Color back, Color fore, Color groupBack, Color textBack, Color btnBack, Color btnFore, bool isDark)
+        {
+            parent.BackColor = back;
+            parent.ForeColor = fore;
+
+            foreach (Control control in parent.Controls)
+            {
+                if (control is GroupBox gb)
+                {
+                    gb.BackColor = groupBack;
+                    gb.ForeColor = fore;
+                    ApplyThemeToControl(gb, groupBack, fore, groupBack, textBack, btnBack, btnFore, isDark);
+                }
+                else if (control is TextBox tb)
+                {
+                    tb.BackColor = textBack;
+                    tb.ForeColor = fore;
+                    if (tb.ReadOnly)
+                    {
+                        tb.BackColor = isDark ? Color.FromArgb(50, 50, 53) : Color.FromArgb(245, 245, 245);
+                    }
+                }
+                else if (control is ComboBox cb)
+                {
+                    cb.BackColor = textBack;
+                    cb.ForeColor = fore;
+                }
+                else if (control is Button btn)
+                {
+                    // DNS preset buttons get secondary styling
+                    if (btn.Tag?.ToString() == "dns-preset")
+                    {
+                        btn.BackColor = isDark ? Color.FromArgb(70, 70, 75) : Color.FromArgb(229, 231, 235);
+                        btn.ForeColor = fore;
+                        btn.FlatStyle = FlatStyle.Flat;
+                        btn.FlatAppearance.BorderColor = isDark ? Color.FromArgb(90, 90, 95) : Color.FromArgb(203, 213, 225);
+                        btn.FlatAppearance.BorderSize = 1;
+                    }
+                    else
+                    {
+                        btn.BackColor = btnBack;
+                        btn.ForeColor = btnFore;
+                        btn.FlatStyle = FlatStyle.Flat;
+                        btn.FlatAppearance.BorderSize = 0;
+                    }
+                }
+                else if (control is CheckBox chk)
+                {
+                    chk.ForeColor = fore;
+                }
+                else if (control is Label lbl)
+                {
+                    // Preserve special label colors
+                    if (lbl != lblCurrentDhcp && lbl != lblAdapterInfo)
+                    {
+                        lbl.ForeColor = fore;
+                    }
+                }
+                else if (control is Panel pnl)
+                {
+                    pnl.BackColor = back;
+                    ApplyThemeToControl(pnl, back, fore, groupBack, textBack, btnBack, btnFore, isDark);
+                }
+                else if (control is MenuStrip ms)
+                {
+                    ms.BackColor = isDark ? Color.FromArgb(45, 45, 48) : Color.FromArgb(249, 250, 251);
+                    ms.ForeColor = fore;
+                    foreach (ToolStripMenuItem item in ms.Items)
+                    {
+                        ApplyThemeToMenuItem(item, fore, isDark);
+                    }
+                }
+                else if (control is StatusStrip ss)
+                {
+                    ss.BackColor = isDark ? Color.FromArgb(45, 45, 48) : Color.FromArgb(249, 250, 251);
+                    foreach (ToolStripItem item in ss.Items)
+                    {
+                        if (item is ToolStripStatusLabel tsl && item != lblAdmin)
+                        {
+                            tsl.ForeColor = fore;
+                        }
+                    }
+                }
+                else if (control.HasChildren)
+                {
+                    ApplyThemeToControl(control, back, fore, groupBack, textBack, btnBack, btnFore, isDark);
+                }
+            }
+        }
+
+        private void ApplyThemeToMenuItem(ToolStripMenuItem item, Color fore, bool isDark)
+        {
+            item.ForeColor = fore;
+            item.BackColor = isDark ? Color.FromArgb(45, 45, 48) : Color.FromArgb(249, 250, 251);
+            foreach (ToolStripItem subItem in item.DropDownItems)
+            {
+                if (subItem is ToolStripMenuItem subMenuItem)
+                {
+                    ApplyThemeToMenuItem(subMenuItem, fore, isDark);
+                }
             }
         }
 
@@ -1187,11 +1343,18 @@ namespace NetworkConfigApp.Forms
                 "- Static IP / DHCP configuration\n" +
                 "- Presets and backups\n" +
                 "- Network diagnostics\n" +
-                "- MAC address spoofing\n\n" +
-                "https://github.com/BizzyMo/NetworkConfigApp",
+                "- MAC address spoofing",
                 "About",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
+        }
+
+        private void ShowHelp()
+        {
+            using (var form = new HelpForm())
+            {
+                form.ShowDialog(this);
+            }
         }
 
         private async Task ExecuteNetworkOperation(string status, Func<CancellationToken, Task<bool>> operation)
