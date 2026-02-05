@@ -65,7 +65,7 @@ namespace NetworkConfigApp.Core.Utilities
                 return null;
 
             var matches = _allManufacturers
-                .Where(m => m.Manufacturer.Contains(manufacturerName, StringComparison.OrdinalIgnoreCase))
+                .Where(m => m.Manufacturer.IndexOf(manufacturerName, StringComparison.OrdinalIgnoreCase) >= 0)
                 .ToList();
 
             if (matches.Count == 0)
@@ -101,7 +101,7 @@ namespace NetworkConfigApp.Core.Utilities
             };
 
             return _allManufacturers
-                .Where(m => common.Any(c => m.Manufacturer.Contains(c, StringComparison.OrdinalIgnoreCase)))
+                .Where(m => common.Any(c => m.Manufacturer.IndexOf(c, StringComparison.OrdinalIgnoreCase) >= 0))
                 .GroupBy(m => GetPrimaryManufacturer(m.Manufacturer))
                 .Select(g => g.First())
                 .OrderBy(m => m.Manufacturer)
