@@ -11,8 +11,9 @@
     <!-- <ApplicationIcon>Resources\app.ico</ApplicationIcon> -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>false</SelfContained>
+    <!-- Single file publish not supported for net48, use ILMerge if needed -->
+    <!-- <PublishSingleFile>true</PublishSingleFile> -->
+    <!-- <SelfContained>false</SelfContained> -->
   </PropertyGroup>
 
   <ItemGroup>
