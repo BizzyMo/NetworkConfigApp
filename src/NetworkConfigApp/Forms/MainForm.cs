@@ -646,12 +646,6 @@ namespace NetworkConfigApp.Forms
                         btn.ForeColor = btnFore;
                         btn.FlatStyle = FlatStyle.Flat;
                         btn.FlatAppearance.BorderSize = 0;
-
-                        // For disabled buttons, use custom drawing to maintain text color
-                        if (!btn.Enabled)
-                        {
-                            btn.BackColor = isDark ? Color.FromArgb(60, 60, 65) : Color.FromArgb(180, 200, 230);
-                        }
                     }
 
                     // Reapply rounded corners after theme change
