@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -250,6 +251,7 @@ namespace NetworkConfigApp.Forms
                 Size = new Size(75, 25)
             };
             btnRefresh.Click += async (s, e) => await RefreshAdapters();
+            ApplyRoundedCorners(btnRefresh, 6);
 
             lblAdapterInfo = new Label
             {
@@ -360,6 +362,11 @@ namespace NetworkConfigApp.Forms
                 txtNewDns2.Text = "149.112.112.112";
             };
 
+            // Apply rounded corners to all buttons in this group
+            ApplyRoundedCorners(btnCopy, 6);
+            ApplyRoundedCorners(btnGoogleDns, 6);
+            ApplyRoundedCorners(btnQuad9Dns, 6);
+
             group.Controls.AddRange(new Control[] {
                 lblIp, txtNewIp,
                 lblSubnet, txtNewSubnet,
@@ -378,20 +385,30 @@ namespace NetworkConfigApp.Forms
         {
             var panel = new Panel();
 
-            btnApplyStatic = new Button { Text = "Apply Static", Location = new Point(0, 5), Size = new Size(100, 30) };
+            // Calculate centered positions (panel width 660, 5 buttons with gaps)
+            // Buttons: 100 + 100 + 110 + 100 + 120 = 530, gaps: 4 * 10 = 40, total = 570
+            var startX = (660 - 570) / 2;  // Center offset = 45
+
+            btnApplyStatic = new Button { Text = "Apply Static", Location = new Point(startX, 5), Size = new Size(100, 30) };
             btnApplyStatic.Click += async (s, e) => await ApplyStaticConfig();
 
-            btnSetDhcp = new Button { Text = "Set DHCP", Location = new Point(110, 5), Size = new Size(100, 30) };
+            btnSetDhcp = new Button { Text = "Set DHCP", Location = new Point(startX + 110, 5), Size = new Size(100, 30) };
             btnSetDhcp.Click += async (s, e) => await SetDhcp();
 
-            btnReleaseRenew = new Button { Text = "Release/Renew", Location = new Point(220, 5), Size = new Size(110, 30) };
+            btnReleaseRenew = new Button { Text = "Release/Renew", Location = new Point(startX + 220, 5), Size = new Size(110, 30) };
             btnReleaseRenew.Click += async (s, e) => await ReleaseRenew();
 
-            btnFlushDns = new Button { Text = "Flush DNS", Location = new Point(340, 5), Size = new Size(100, 30) };
+            btnFlushDns = new Button { Text = "Flush DNS", Location = new Point(startX + 340, 5), Size = new Size(100, 30) };
             btnFlushDns.Click += async (s, e) => await FlushDns();
 
-            btnTestConnectivity = new Button { Text = "Test Connectivity", Location = new Point(450, 5), Size = new Size(120, 30) };
+            btnTestConnectivity = new Button { Text = "Test Connectivity", Location = new Point(startX + 450, 5), Size = new Size(120, 30) };
             btnTestConnectivity.Click += async (s, e) => await TestConnectivity();
+
+            // Apply rounded corners
+            foreach (var btn in new[] { btnApplyStatic, btnSetDhcp, btnReleaseRenew, btnFlushDns, btnTestConnectivity })
+            {
+                ApplyRoundedCorners(btn, 8);
+            }
 
             panel.Controls.AddRange(new Control[] { btnApplyStatic, btnSetDhcp, btnReleaseRenew, btnFlushDns, btnTestConnectivity });
             return panel;
@@ -401,22 +418,35 @@ namespace NetworkConfigApp.Forms
         {
             var panel = new Panel();
 
-            btnSavePreset = new Button { Text = "Save Preset", Location = new Point(0, 5), Size = new Size(100, 30) };
+            // Calculate centered positions (panel width 660, 6 buttons with gaps)
+            // Buttons: 100 + 100 + 80 + 100 + 100 + 80 = 560, gaps: 5 * 10 = 50, total = 610
+            var startX = (660 - 610) / 2;  // Center offset = 25
+
+            btnSavePreset = new Button { Text = "Save Preset", Location = new Point(startX, 5), Size = new Size(100, 30) };
             btnSavePreset.Click += async (s, e) => await SavePreset();
 
-            btnLoadPreset = new Button { Text = "Load Preset", Location = new Point(110, 5), Size = new Size(100, 30) };
+            btnLoadPreset = new Button { Text = "Load Preset", Location = new Point(startX + 110, 5), Size = new Size(100, 30) };
             btnLoadPreset.Click += async (s, e) => await LoadPreset();
 
-            btnUndo = new Button { Text = "Undo", Location = new Point(220, 5), Size = new Size(80, 30), Enabled = false };
+            btnUndo = new Button { Text = "Undo", Location = new Point(startX + 220, 5), Size = new Size(80, 30), Enabled = false };
             btnUndo.Click += async (s, e) => await Undo();
 
-            btnBackup = new Button { Text = "Backup Now", Location = new Point(310, 5), Size = new Size(100, 30) };
+            btnBackup = new Button { Text = "Backup Now", Location = new Point(startX + 310, 5), Size = new Size(100, 30) };
             btnBackup.Click += async (s, e) => await CreateBackup();
 
-            btnRestore = new Button { Text = "Restore", Location = new Point(420, 5), Size = new Size(100, 30) };
+            btnRestore = new Button { Text = "Restore", Location = new Point(startX + 420, 5), Size = new Size(100, 30) };
             btnRestore.Click += async (s, e) => await RestoreBackup();
 
-            panel.Controls.AddRange(new Control[] { btnSavePreset, btnLoadPreset, btnUndo, btnBackup, btnRestore });
+            var btnClose = new Button { Text = "Close", Location = new Point(startX + 530, 5), Size = new Size(80, 30) };
+            btnClose.Click += (s, e) => CloseApplication();
+
+            // Apply rounded corners
+            foreach (var btn in new[] { btnSavePreset, btnLoadPreset, btnUndo, btnBackup, btnRestore, btnClose })
+            {
+                ApplyRoundedCorners(btn, 8);
+            }
+
+            panel.Controls.AddRange(new Control[] { btnSavePreset, btnLoadPreset, btnUndo, btnBackup, btnRestore, btnClose });
             return panel;
         }
 
@@ -467,20 +497,22 @@ namespace NetworkConfigApp.Forms
             txtLog = new TextBox
             {
                 Location = new Point(10, 18),
-                Size = new Size(640, 140),
+                Size = new Size(640, 155),  // Increased height to fill box
                 Multiline = true,
                 ReadOnly = true,
                 ScrollBars = ScrollBars.Vertical,
-                Font = new Font("Consolas", 9)
+                Font = new Font("Consolas", 9),
+                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
 
             progressBar = new ProgressBar
             {
-                Location = new Point(10, 165),
-                Size = new Size(640, 20),
+                Location = new Point(10, 178),
+                Size = new Size(640, 15),
                 Style = ProgressBarStyle.Marquee,
                 MarqueeAnimationSpeed = 30,
-                Visible = false
+                Visible = false,
+                Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
 
             group.Controls.AddRange(new Control[] { txtLog, progressBar });
@@ -614,7 +646,16 @@ namespace NetworkConfigApp.Forms
                         btn.ForeColor = btnFore;
                         btn.FlatStyle = FlatStyle.Flat;
                         btn.FlatAppearance.BorderSize = 0;
+
+                        // For disabled buttons, use custom drawing to maintain text color
+                        if (!btn.Enabled)
+                        {
+                            btn.BackColor = isDark ? Color.FromArgb(60, 60, 65) : Color.FromArgb(180, 200, 230);
+                        }
                     }
+
+                    // Reapply rounded corners after theme change
+                    ApplyRoundedCorners(btn, btn.Height > 26 ? 8 : 6);
                 }
                 else if (control is CheckBox chk)
                 {
@@ -686,17 +727,30 @@ namespace NetworkConfigApp.Forms
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (_settings.MinimizeToTray && e.CloseReason == CloseReason.UserClosing)
-            {
-                e.Cancel = true;
-                Hide();
-                notifyIcon.ShowBalloonTip(1000, "Network Config", "Application minimized to tray", ToolTipIcon.Info);
-            }
-            else
-            {
-                notifyIcon.Visible = false;
-                _operationCts?.Cancel();
-            }
+            // Always close properly - no minimize to tray on X click
+            CloseApplication();
+        }
+
+        private void CloseApplication()
+        {
+            notifyIcon.Visible = false;
+            _operationCts?.Cancel();
+            Application.Exit();
+        }
+
+        private void ApplyRoundedCorners(Button btn, int radius)
+        {
+            var path = new GraphicsPath();
+            var rect = new Rectangle(0, 0, btn.Width, btn.Height);
+
+            // Create rounded rectangle path
+            path.AddArc(rect.X, rect.Y, radius * 2, radius * 2, 180, 90);
+            path.AddArc(rect.Right - radius * 2, rect.Y, radius * 2, radius * 2, 270, 90);
+            path.AddArc(rect.Right - radius * 2, rect.Bottom - radius * 2, radius * 2, radius * 2, 0, 90);
+            path.AddArc(rect.X, rect.Bottom - radius * 2, radius * 2, radius * 2, 90, 90);
+            path.CloseAllFigures();
+
+            btn.Region = new Region(path);
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
