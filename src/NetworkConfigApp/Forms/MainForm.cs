@@ -430,6 +430,19 @@ namespace NetworkConfigApp.Forms
 
             btnUndo = new Button { Text = "Undo", Location = new Point(startX + 220, 5), Size = new Size(80, 30), Enabled = false };
             btnUndo.Click += async (s, e) => await Undo();
+            // Force white text even when disabled
+            btnUndo.Paint += (s, e) =>
+            {
+                var btn = (Button)s;
+                e.Graphics.Clear(btn.BackColor);
+                var textSize = e.Graphics.MeasureString(btn.Text, btn.Font);
+                var x = (btn.Width - textSize.Width) / 2;
+                var y = (btn.Height - textSize.Height) / 2;
+                using (var brush = new SolidBrush(Color.White))
+                {
+                    e.Graphics.DrawString(btn.Text, btn.Font, brush, x, y);
+                }
+            };
 
             btnBackup = new Button { Text = "Backup Now", Location = new Point(startX + 310, 5), Size = new Size(100, 30) };
             btnBackup.Click += async (s, e) => await CreateBackup();
