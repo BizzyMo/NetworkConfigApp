@@ -451,6 +451,11 @@ namespace NetworkConfigApp.Forms
             btnRestore.Click += async (s, e) => await RestoreBackup();
 
             var btnClose = new Button { Text = "Close", Location = new Point(startX + 530, 5), Size = new Size(80, 30) };
+            btnClose.BackColor = Color.FromArgb(220, 38, 38);  // Red color
+            btnClose.ForeColor = Color.White;
+            btnClose.FlatStyle = FlatStyle.Flat;
+            btnClose.FlatAppearance.BorderSize = 0;
+            btnClose.Tag = "close-button";  // Tag to preserve red color in theme
             btnClose.Click += (s, e) => CloseApplication();
 
             // Apply rounded corners
@@ -652,6 +657,14 @@ namespace NetworkConfigApp.Forms
                         btn.FlatStyle = FlatStyle.Flat;
                         btn.FlatAppearance.BorderColor = isDark ? Color.FromArgb(90, 90, 95) : Color.FromArgb(203, 213, 225);
                         btn.FlatAppearance.BorderSize = 1;
+                    }
+                    else if (btn.Tag?.ToString() == "close-button")
+                    {
+                        // Close button stays red
+                        btn.BackColor = Color.FromArgb(220, 38, 38);
+                        btn.ForeColor = Color.White;
+                        btn.FlatStyle = FlatStyle.Flat;
+                        btn.FlatAppearance.BorderSize = 0;
                     }
                     else
                     {
