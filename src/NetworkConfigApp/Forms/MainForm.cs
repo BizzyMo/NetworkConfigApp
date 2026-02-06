@@ -123,7 +123,7 @@ namespace NetworkConfigApp.Forms
             Size = new Size(700, 750);
             MinimumSize = new Size(650, 700);
             StartPosition = FormStartPosition.CenterScreen;
-            Icon = SystemIcons.Application;
+            Icon = LoadAppIcon();
             KeyPreview = true;
 
             // Main menu
@@ -756,6 +756,35 @@ namespace NetworkConfigApp.Forms
             notifyIcon.Visible = false;
             _operationCts?.Cancel();
             Application.Exit();
+        }
+
+        /// <summary>
+        /// Loads the application icon from embedded resources.
+        /// Converts the embedded PNG to an Icon for use in the form title bar.
+        /// </summary>
+        private Icon LoadAppIcon()
+        {
+            try
+            {
+                var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                using (var stream = assembly.GetManifestResourceStream("NetworkConfigApp.Resources.app_icon.png"))
+                {
+                    if (stream != null)
+                    {
+                        using (var bitmap = new Bitmap(stream))
+                        {
+                            // Create icon from bitmap
+                            IntPtr hIcon = bitmap.GetHicon();
+                            return Icon.FromHandle(hIcon);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Fall back to default icon if loading fails
+            }
+            return SystemIcons.Application;
         }
 
         private void ApplyRoundedCorners(Button btn, int radius)
