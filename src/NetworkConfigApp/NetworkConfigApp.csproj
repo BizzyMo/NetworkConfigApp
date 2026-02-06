@@ -11,9 +11,11 @@
     <!-- <ApplicationIcon>Resources\app.ico</ApplicationIcon> -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <!-- Single file publish not supported for net48, use ILMerge if needed -->
-    <!-- <PublishSingleFile>true</PublishSingleFile> -->
-    <!-- <SelfContained>false</SelfContained> -->
+  </PropertyGroup>
+
+  <!-- ILRepack for single-file executable -->
+  <PropertyGroup>
+    <ILRepackEnabled>true</ILRepackEnabled>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,10 +34,38 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.34.2" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\oui_database.txt" />
   </ItemGroup>
+
+  <!-- ILRepack: Merge all DLLs into single portable EXE after build -->
+  <Target Name="ILRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <OutputDir>$(OutputPath)</OutputDir>
+      <MergedExe>$(OutputDir)NetworkConfigApp.Portable.exe</MergedExe>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <AssembliesToMerge Include="$(OutputDir)NetworkConfigApp.exe" />
+      <AssembliesToMerge Include="$(OutputDir)NetworkConfigApp.Core.dll" />
+      <AssembliesToMerge Include="$(OutputDir)Newtonsoft.Json.dll" />
+    </ItemGroup>
+
+    <ILRepack
+      OutputType="WinExe"
+      MainAssembly="$(OutputDir)NetworkConfigApp.exe"
+      OutputAssembly="$(MergedExe)"
+      InputAssemblies="@(AssembliesToMerge)"
+      WilcardInputAssemblies="false"
+      Parallel="true"
+      Internalize="true"
+      AllowDuplicateResources="true"
+      DebugInfo="false" />
+
+    <Message Text="Created portable executable: $(MergedExe)" Importance="High" />
+  </Target>
 
 </Project>
